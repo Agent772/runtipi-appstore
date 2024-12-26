@@ -1,0 +1,36 @@
+{
+  "services": [
+    {
+      "name": "vouchervault",
+      "image": "l4rm4nd/vouchervault:1.7.3",
+      "isMain": true,
+      "internalPort": 8000,
+      "environment":
+      {
+        "DOMAIN":"vouchervault.${LOCAL_DOMAIN}",
+        "SECURE_COOKIES": false,
+        "EXPIRY_THRESHOLD_DAYS": 90,
+        "TZ": "${TZ}"
+      },
+      "dependsOn": ["broker"],
+      "expose": ["${APP_PORT}"],
+      "volumes": [
+        {
+          "hostPath": "${APP_DATA_DIR}/data/database",
+          "containerPath": "/opt/app/database"
+        }
+      ]
+    },
+    {
+      "name": "vouchervault-redis",
+      "image": "redis:7-alpine",
+      "volumes": [
+        {
+          "hostPath": "${APP_DATA_DIR}/data/redis",
+          "containerPath": "/data"
+        }
+      ],
+      "expose": [6379]
+    }
+  ]
+}

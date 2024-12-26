@@ -1,0 +1,59 @@
+services:
+  vouchervault:
+    image: l4rm4nd/vouchervault:1.7.3
+    container_name: vouchervault
+    restart: unless-stopped
+    environment:
+      DOMAIN: vouchervault.${LOCAL_DOMAIN}
+      SECURE_COOKIES: False
+      EXPIRY_THRESHOLD_DAYS: 90
+      TZ: ${TZ}
+      REDIS_URL: redis://vouchervault-redis:6379
+    depends_on:
+      - vouchervault-redis
+    expose:
+      - ${APP_PORT}
+    ports:
+      - ${APP_PORT}:8000
+    volumes:
+      - ${APP_DATA_DIR}/data/database:/opt/app/database
+    networks:
+      - tipi_main_network 
+    labels:
+      # Main
+      traefik.enable: true
+      traefik.http.middlewares.vouchervault-web-redirect.redirectscheme.scheme: https
+      traefik.http.services.vouchervault.loadbalancer.server.port: 8000 # Should be the same as the app internal port so for this example 9443
+      # Web
+      traefik.http.routers.vouchervault-insecure.rule: Host(`${APP_DOMAIN}`)
+      traefik.http.routers.vouchervault-insecure.entrypoints: web
+      traefik.http.routers.vouchervault-insecure.service: vouchervault
+      traefik.http.routers.vouchervault-insecure.middlewares: vouchervault-web-redirect
+      # Websecure
+      traefik.http.routers.vouchervault.rule: Host(`${APP_DOMAIN}`)
+      traefik.http.routers.vouchervault.entrypoints: websecure
+      traefik.http.routers.vouchervault.service: vouchervault
+      traefik.http.routers.vouchervault.tls.certresolver: myresolver
+      # Local domain
+      traefik.http.routers.vouchervault-local-insecure.rule: Host(`vouchervault.${LOCAL_DOMAIN}`)
+      traefik.http.routers.vouchervault-local-insecure.entrypoints: web
+      traefik.http.routers.vouchervault-local-insecure.service: vouchervault
+      traefik.http.routers.vouchervault-local-insecure.middlewares: vouchervault-web-redirect
+      # Local domain secure
+      traefik.http.routers.vouchervault-local.rule: Host(`vouchervault.${LOCAL_DOMAIN}`)
+      traefik.http.routers.vouchervault-local.entrypoints: websecure
+      traefik.http.routers.vouchervault-local.service: vouchervault
+      traefik.http.routers.vouchervault-local.tls: true
+
+  vouchervault-redis:
+    image: redis:7-alpine
+    container_name: vouchervault-redis
+    restart: unless-stopped
+    volumes:
+      - ${APP_DATA_DIR}/data/redis:/data
+    expose:
+      - 6379
+    networks:
+      - tipi_main_network
+    labels:
+      runtipi.managed: true

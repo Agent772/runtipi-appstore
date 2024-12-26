@@ -1,0 +1,18 @@
+{
+    "name": "VoucherVault",
+    "id": "vouchervault",
+    "available": true,
+    "short_desc": "Django web application to store and manage vouchers, coupons, loyalty and gift cards digitally",
+    "author": "l4rm4nd",
+    "port": 8475,
+    "categories": ["utilities", "finance"],
+    "description": "Django web application to store and manage vouchers, coupons, loyalty and gift cards digitally",
+    "tipi_version": 1,
+    "version": "v1.7.3",
+    "source": "https://github.com/l4rm4nd/VoucherVault",
+    "exposable": true,
+    "supported_architectures": ["arm64", "amd64"],
+    "created_at": 1724134338800,
+    "updated_at": 1724134338800,
+    "dynamic_config": true
+  }
